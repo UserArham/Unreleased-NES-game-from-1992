@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NES Simulator + Kirby Prototype</title>
+<style>
+  body { background:#111; color:#eee; font-family:sans-serif; text-align:center; }
+  canvas { image-rendering: pixelated; border:2px solid #555; }
+</style>
+</head>
+<body>
+
+<h1>NES Simulator (C++ WASM)</h1>
+<p>Kirby Prototype Environment</p>
+
+<input type="file" id="romInput" accept=".nes"><br><br>
+<input type="file" id="palInput" accept=".pal"><br><br>
+
+<canvas id="screen" width="256" height="240"></canvas><br><br>
+<button onclick="nesReset()">Reset</button>
+
+<script src="nes.js"></script>
+<script>
+const canvas = document.getElementById("screen");
+const ctx = canvas.getContext("2d");
+const imageData = ctx.createImageData(256, 240);
+
+Module.onRuntimeInitialized = () => {
+    Module._nes_init();
+    requestAnimationFrame(loop);
+};
+
+// NES rendering loop
+function loop() {
+    Module._nes_step();
+    const fb = Module.HEAPU8.subarray(
+        Module._nes_framebuffer(),
+        Module._nes_framebuffer() + 256*240*4
+    );
+    imageData.data.set(fb);
+    ctx.putImageData(imageData, 0, 0);
+    requestAnimationFrame(loop);
+}
+
+// Reset NES
+function nesReset() {
+    Module._nes_reset();
+}
+
+// Load ROM
+document.getElementById("romInput").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        const data = new Uint8Array(reader.result);
+        const ptr = Module._malloc(data.length);
+        Module.HEAPU8.set(data, ptr);
+        Module._nes_load_rom(ptr, data.length);
+        Module._free(ptr);
+    };
+    reader.readAsArrayBuffer(file);
+});
+
+// Load Palette
+document.getElementById("palInput").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+        const data = new Uint8Array(reader.result);
+        const ptr = Module._malloc(data.length);
+        Module.HEAPU8.set(data, ptr);
+        Module._nes_load_palette(ptr, data.length);
+        Module._free(ptr);
+    };
+    reader.readAsArrayBuffer(file);
+});
+</script>
+</body>
+</html>
