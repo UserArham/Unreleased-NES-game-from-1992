@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kirby NES Prototype Palette Generator</title>
+</head>
+<body>
+  <h1>Kirby: Dreamland Echoes (1992)</h1>
+  <p>NES Prototype Palette (.pal)</p>
+
+  <button id="download">Download kirby_proto.pal</button>
+
+  <script>
+    // REAL NES palette data (32 bytes)
+    const nesPalette = new Uint8Array([
+      // Background palettes (16 bytes)
+      0x0F, 0x30, 0x21, 0x11,
+      0x0F, 0x27, 0x18, 0x08,
+      0x0F, 0x16, 0x26, 0x30,
+      0x0F, 0x06, 0x15, 0x25,
+
+      // Sprite palettes (16 bytes)
+      0x0F, 0x30, 0x16, 0x26,
+      0x0F, 0x27, 0x18, 0x08,
+      0x0F, 0x30, 0x21, 0x11,
+      0x0F, 0x06, 0x15, 0x25
+    ]);
+
+    document.getElementById("download").onclick = () => {
+      const blob = new Blob([nesPalette], { type: "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "kirby_proto.pal";
+      document.body.appendChild(a);
+      a.click();
+
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+  </script>
+</body>
+</html>
