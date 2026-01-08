@@ -1,0 +1,4 @@
+emcc nes.cpp -O2 \
+-s EXPORTED_FUNCTIONS="['_nes_init','_nes_step','_nes_reset','_nes_framebuffer','_nes_load_rom','_nes_load_palette']" \
+-s EXPORTED_RUNTIME_METHODS="['HEAPU8']" \
+-o nes.js
